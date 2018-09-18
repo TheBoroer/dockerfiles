@@ -51,9 +51,10 @@ copy_s3 () {
     AWS_ARGS="--endpoint-url ${S3_ENDPOINT}"
   fi
 
-  echo "Uploading $SRC_FILE dump to $S3_BUCKET / $DEST_FILE"
+  echo "Uploading $SRC_FILE dump to $S3_ENDPOINT/$S3_BUCKET/$DEST_FILE"
 
-  cat $SRC_FILE | aws $AWS_ARGS s3 cp - s3://$S3_BUCKET/$S3_PREFIX/$DEST_FILE || exit 2
+  #cat $SRC_FILE | aws $AWS_ARGS s3 cp - s3://$S3_BUCKET/$S3_PREFIX/$DEST_FILE || exit 2
+  aws $AWS_ARGS s3api put-object --body $SRC_FILE --bucket $S3_BUCKET --key $S3_PREFIX/$DEST_FILE || exit 2
   
   if [ $? != 0 ]; then
     >&2 echo "Error uploading ${DEST_FILE} on S3"
@@ -78,12 +79,7 @@ if [ ! -z "$(echo $MULTI_FILES | grep -i -E "(yes|true|1)")" ]; then
     mysqldump $MYSQL_HOST_OPTS $MYSQLDUMP_OPTIONS --databases $DB | gzip > $DUMP_FILE
 
     if [ $? == 0 ]; then
-      if [ "${S3_FILENAME}" == "**None**" ]; then
-        S3_FILE="${DUMP_START_TIME}.${DB}.sql.gz"
-      else
-        S3_FILE="${S3_FILENAME}.${DB}.sql.gz"
-      fi
-
+      S3_FILE="${DB}_${DUMP_START_TIME}.sql.gz"
       copy_s3 $DUMP_FILE $S3_FILE
     else
       >&2 echo "Error creating dump of ${DB}"
@@ -97,12 +93,7 @@ else
   mysqldump $MYSQL_HOST_OPTS $MYSQLDUMP_OPTIONS $MYSQLDUMP_DATABASE | gzip > $DUMP_FILE
 
   if [ $? == 0 ]; then
-    if [ "${S3_FILENAME}" == "**None**" ]; then
-      S3_FILE="${DUMP_START_TIME}.sql.gz"
-    else
-      S3_FILE="${S3_FILENAME}.sql.gz"
-    fi
-
+    S3_FILE="mysql_${DUMP_START_TIME}.sql.gz"
     copy_s3 $DUMP_FILE $S3_FILE
   else
     >&2 echo "Error creating dump of all databases"
