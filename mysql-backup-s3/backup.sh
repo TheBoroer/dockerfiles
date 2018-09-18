@@ -1,13 +1,16 @@
 #! /bin/sh
 
 set -e
+set -o pipefail
 
-if [ "${S3_ACCESS_KEY_ID}" == "**None**" ]; then
-  echo "Warning: You did not set the S3_ACCESS_KEY_ID environment variable."
+if [ "${S3_ACCESS_KEY_ID}" = "**None**" ]; then
+  echo "You need to set the S3_ACCESS_KEY_ID environment variable."
+  exit 1
 fi
 
-if [ "${S3_SECRET_ACCESS_KEY}" == "**None**" ]; then
-  echo "Warning: You did not set the S3_SECRET_ACCESS_KEY environment variable."
+if [ "${S3_SECRET_ACCESS_KEY}" = "**None**" ]; then
+  echo "You need to set the S3_SECRET_ACCESS_KEY environment variable."
+  exit 1
 fi
 
 if [ "${S3_BUCKET}" == "**None**" ]; then
@@ -36,7 +39,7 @@ export AWS_SECRET_ACCESS_KEY=$S3_SECRET_ACCESS_KEY
 export AWS_DEFAULT_REGION=$S3_REGION
 
 MYSQL_HOST_OPTS="-h $MYSQL_HOST -P $MYSQL_PORT -u$MYSQL_USER -p$MYSQL_PASSWORD"
-DUMP_START_TIME=$(date +"%Y-%m-%dT%H%M%SZ")
+DUMP_START_TIME=$(date +"%Y-%m-%dT%H:%M:%SZ")
 
 copy_s3 () {
   SRC_FILE=$1
@@ -48,7 +51,7 @@ copy_s3 () {
     AWS_ARGS="--endpoint-url ${S3_ENDPOINT}"
   fi
 
-  echo "Uploading $DEST_FILE dump to $S3_BUCKET"
+  echo "Uploading $SRC_FILE dump to $S3_BUCKET / $DEST_FILE"
 
   cat $SRC_FILE | aws $AWS_ARGS s3 cp - s3://$S3_BUCKET/$S3_PREFIX/$DEST_FILE || exit 2
   
@@ -58,6 +61,7 @@ copy_s3 () {
 
   rm $SRC_FILE
 }
+
 # Multi file: yes
 if [ ! -z "$(echo $MULTI_FILES | grep -i -E "(yes|true|1)")" ]; then
   if [ "${MYSQLDUMP_DATABASE}" == "--all-databases" ]; then
