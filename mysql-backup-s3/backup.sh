@@ -30,12 +30,10 @@ if [ "${MYSQL_PASSWORD}" == "**None**" ]; then
   exit 1
 fi
 
-if [ "${S3_IAMROLE}" != "true" ]; then
-  # env vars needed for aws tools - only if an IAM role is not used
-  export AWS_ACCESS_KEY_ID=$S3_ACCESS_KEY_ID
-  export AWS_SECRET_ACCESS_KEY=$S3_SECRET_ACCESS_KEY
-  export AWS_DEFAULT_REGION=$S3_REGION
-fi
+# env vars needed for aws tools
+export AWS_ACCESS_KEY_ID=$S3_ACCESS_KEY_ID
+export AWS_SECRET_ACCESS_KEY=$S3_SECRET_ACCESS_KEY
+export AWS_DEFAULT_REGION=$S3_REGION
 
 MYSQL_HOST_OPTS="-h $MYSQL_HOST -P $MYSQL_PORT -u$MYSQL_USER -p$MYSQL_PASSWORD"
 DUMP_START_TIME=$(date +"%Y-%m-%dT%H%M%SZ")
@@ -50,10 +48,10 @@ copy_s3 () {
     AWS_ARGS="--endpoint-url ${S3_ENDPOINT}"
   fi
 
-  echo "Uploading ${DEST_FILE} on S3..."
+  echo "Uploading $DEST_FILE dump to $S3_BUCKET"
 
-  cat $SRC_FILE | aws $AWS_ARGS s3 cp - s3://$S3_BUCKET/$S3_PREFIX/$DEST_FILE
-
+  cat $SRC_FILE | aws $AWS_ARGS s3 cp - s3://$S3_BUCKET/$S3_PREFIX/$DEST_FILE || exit 2
+  
   if [ $? != 0 ]; then
     >&2 echo "Error uploading ${DEST_FILE} on S3"
   fi
@@ -96,7 +94,7 @@ else
 
   if [ $? == 0 ]; then
     if [ "${S3_FILENAME}" == "**None**" ]; then
-      S3_FILE="${DUMP_START_TIME}.dump.sql.gz"
+      S3_FILE="${DUMP_START_TIME}.sql.gz"
     else
       S3_FILE="${S3_FILENAME}.sql.gz"
     fi
@@ -107,4 +105,4 @@ else
   fi
 fi
 
-echo "SQL backup finished"
+echo "SQL backup uploaded successfully"
