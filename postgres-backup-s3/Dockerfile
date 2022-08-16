@@ -1,4 +1,4 @@
-FROM alpine:3.7
+FROM alpine:3.16
 LABEL maintainer="Boro Vukovic <docker@bo.ro>"
 
 ADD install.sh install.sh
