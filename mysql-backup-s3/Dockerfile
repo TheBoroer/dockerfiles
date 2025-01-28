@@ -1,8 +1,22 @@
-FROM alpine:3.7
-LABEL maintainer="Boro Vukovic <docker@bo.ro>"
+FROM alpine:3.21
 
-ADD install.sh install.sh
-RUN sh install.sh && rm install.sh
+RUN apk update
+
+# install mysqldump
+RUN apk add mysql-client
+
+# install s3 tools
+RUN apk add python3 py3-pip && \
+    pip install awscli
+
+# install go-cron
+RUN apk add curl && \
+    curl -L --insecure https://github.com/odise/go-cron/releases/download/v0.0.6/go-cron-linux.gz | zcat > /usr/local/bin/go-cron && \
+    chmod u+x /usr/local/bin/go-cron && \
+    apk del curl
+
+# cleanup
+RUN rm -rf /var/cache/apk/*
 
 ENV MYSQLDUMP_OPTIONS --quote-names --quick --add-drop-table --add-locks --allow-keywords --disable-keys --extended-insert --single-transaction --create-options --comments --net_buffer_length=16384
 ENV MYSQLDUMP_DATABASE --all-databases

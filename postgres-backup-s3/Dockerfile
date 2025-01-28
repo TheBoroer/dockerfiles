@@ -1,8 +1,22 @@
-FROM alpine:3.16
-LABEL maintainer="Boro Vukovic <docker@bo.ro>"
+FROM alpine:3.21
 
-ADD install.sh install.sh
-RUN sh install.sh && rm install.sh
+RUN apk update
+
+# install pg_dump
+RUN apk add postgresql
+
+# install s3 tools
+RUN apk add python3 py3-pip && \
+    pip install awscli
+
+# install go-cron
+RUN apk add curl && \
+    curl -L --insecure https://github.com/odise/go-cron/releases/download/v0.0.6/go-cron-linux.gz | zcat > /usr/local/bin/go-cron && \
+    chmod u+x /usr/local/bin/go-cron && \
+    apk del curl
+
+# cleanup
+RUN rm -rf /var/cache/apk/*
 
 ENV POSTGRES_DATABASE **None**
 ENV POSTGRES_HOST **None**
