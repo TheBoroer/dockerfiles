@@ -5,7 +5,7 @@ Backup MySQL to S3 (supports periodic backups & mutli files)
 ## Basic usage
 
 ```sh
-$ docker run -e S3_ACCESS_KEY_ID=key -e S3_SECRET_ACCESS_KEY=secret -e S3_BUCKET=my-bucket -e S3_PREFIX=backup -e MYSQL_USER=user -e MYSQL_PASSWORD=password -e MYSQL_HOST=localhost schickling/mysql-backup-s3
+$ docker run -e S3_ACCESS_KEY_ID=key -e S3_SECRET_ACCESS_KEY=secret -e S3_BUCKET=my-bucket -e S3_PREFIX=backup -e MYSQL_USER=user -e MYSQL_PASSWORD=password -e MYSQL_HOST=localhost boro/mysql-backup-s3
 ```
 
 ## Environment variables
