@@ -6,8 +6,7 @@ RUN apk update
 RUN apk add mysql-client
 
 # install s3 tools
-RUN apk add python3 py3-pip && \
-    pip install awscli
+RUN apk add aws-cli
 
 # install go-cron
 RUN apk add curl && \
