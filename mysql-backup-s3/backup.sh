@@ -51,10 +51,10 @@ copy_s3 () {
     AWS_ARGS="--endpoint-url ${S3_ENDPOINT}"
   fi
 
-  echo "Uploading $SRC_FILE dump to $S3_ENDPOINT/$S3_BUCKET/$DEST_FILE"
+  echo "Uploading $SRC_FILE dump to $S3_ENDPOINT/$S3_BUCKET/$S3_PREFIX$DEST_FILE"
 
   #cat $SRC_FILE | aws $AWS_ARGS s3 cp - s3://$S3_BUCKET/$S3_PREFIX/$DEST_FILE || exit 2
-  aws $AWS_ARGS s3api put-object --body $SRC_FILE --bucket $S3_BUCKET --key $S3_PREFIX/$DEST_FILE || exit 2
+  aws $AWS_ARGS s3api put-object --body $SRC_FILE --bucket $S3_BUCKET --key $S3_PREFIX$DEST_FILE || exit 2
   
   if [ $? != 0 ]; then
     >&2 echo "Error uploading ${DEST_FILE} on S3"
