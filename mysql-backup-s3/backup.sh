@@ -76,7 +76,7 @@ if [ ! -z "$(echo $MULTI_FILES | grep -i -E "(yes|true|1)")" ]; then
 
     DUMP_FILE="/tmp/${DB}.sql.gz"
 
-    mysqldump $MYSQL_HOST_OPTS $MYSQLDUMP_OPTIONS --databases $DB | gzip > $DUMP_FILE
+    /usr/bin/mariadb-dump $MYSQL_HOST_OPTS $MYSQLDUMP_OPTIONS --databases $DB | gzip > $DUMP_FILE
 
     if [ $? == 0 ]; then
       S3_FILE="${DB}_${DUMP_START_TIME}.sql.gz"
@@ -90,7 +90,7 @@ else
   echo "Creating dump for ${MYSQLDUMP_DATABASE} from ${MYSQL_HOST}..."
 
   DUMP_FILE="/tmp/dump.sql.gz"
-  mysqldump $MYSQL_HOST_OPTS $MYSQLDUMP_OPTIONS $MYSQLDUMP_DATABASE | gzip > $DUMP_FILE
+  /usr/bin/mariadb-dump $MYSQL_HOST_OPTS $MYSQLDUMP_OPTIONS $MYSQLDUMP_DATABASE | gzip > $DUMP_FILE
 
   if [ $? == 0 ]; then
     S3_FILE="mysql_${DUMP_START_TIME}.sql.gz"
