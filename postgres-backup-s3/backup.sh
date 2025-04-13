@@ -82,7 +82,7 @@ DUMP_START_TIME=$(date +"%Y-%m-%dT%H:%M:%SZ")
 
 if [ "${POSTGRES_DATABASE}" != "**None**" ]; then
   # Backup single specified database
-  BACKUP_FILENAME="${POSTGRES_DATABASE}_${DUMP_START_TIME}.sql.gz"
+  BACKUP_FILENAME="${POSTGRES_DATABASE}.sql.gz"
   echo "Creating dump of ${POSTGRES_DATABASE} database from ${POSTGRES_HOST} to ${BACKUP_FILENAME}..."
   pg_dump $POSTGRES_HOST_OPTS $POSTGRES_DATABASE | gzip >"${BACKUP_FILENAME}"
   copy_s3 $BACKUP_FILENAME $BACKUP_FILENAME
@@ -92,14 +92,14 @@ else
   # Multi file: yes
   if [ ! -z "$(echo $MULTI_FILES | grep -i -E "(yes|true|1)")" ]; then
     # backup globals
-    BACKUP_FILENAME="globals_${DUMP_START_TIME}.sql.gz"
+    BACKUP_FILENAME="globals.sql.gz"
     echo "Creating dump of globals from ${POSTGRES_HOST}:${POSTGRES_PORT}..."
     pg_dumpall $POSTGRES_HOST_OPTS --globals-only | gzip >"${BACKUP_FILENAME}"
     copy_s3 $BACKUP_FILENAME $BACKUP_FILENAME
 
     # backup each database into a separate file
     for DB in $(psql $POSTGRES_HOST_OPTS -l -t | cut -d'|' -f1 | sed -e 's/ //g' -e '/^$/d' | grep -v -E "(template0|template1)"); do
-      BACKUP_FILENAME="${DB}_${DUMP_START_TIME}.sql.gz"
+      BACKUP_FILENAME="${DB}.sql.gz"
       echo "Creating dump of ${DB} from ${POSTGRES_HOST}:${POSTGRES_PORT}..."
       pg_dump $POSTGRES_HOST_OPTS --create $DB | gzip >"${BACKUP_FILENAME}"
       copy_s3 $BACKUP_FILENAME $BACKUP_FILENAME
