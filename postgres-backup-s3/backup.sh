@@ -106,7 +106,7 @@ else
     done
   else
     # backup all databases into a single dump file
-    BACKUP_FILENAME="${POSTGRES_HOST}_${POSTGRES_PORT}_${DUMP_START_TIME}.sql.gz"
+    BACKUP_FILENAME="${POSTGRES_HOST}_${POSTGRES_PORT}.sql.gz"
     echo "Creating dump of all databases from ${POSTGRES_HOST}:${POSTGRES_PORT}..."
     pg_dumpall $POSTGRES_HOST_OPTS --clean --if-exists | gzip >"${BACKUP_FILENAME}"
     copy_s3 $BACKUP_FILENAME $BACKUP_FILENAME
